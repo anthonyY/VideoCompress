@@ -4,16 +4,18 @@ setlocal EnableDelayedExpansion
 
 set currentPath=%~dp0%
 
-
+set width=
+set height=
+set audioSimpleRate=44100
 
 ::读取配置文件
 
 for /f "tokens=1,2 delims==" %%i in (%currentPath%/config.properties) do (
-	if "%%i"=="bitRate" set bitRate=%%jk
+	if "%%i"=="bitRate" set bitRate=%%j
 	if "%%i"=="width" set width=%%j
 	if "%%i"=="height" set height=%%j
 	if "%%i"=="fps" set fps=%%j
-	if "%%i"=="audioBitRate" set audioBitRate=%%jk
+	if "%%i"=="audioBitRate" set audioBitRate=%%j
 	if "%%i"=="audioSimpleRate" set audioSimpleRate=%%j	
 	if "%%i"=="outPutFormat" set outPutFormat=%%j
 
@@ -36,11 +38,25 @@ if %input% == "" (
 )
 
 @echo "您要压缩的文件是：%input%"
-@echo "宽：%width%"
-@echo "高：%height%"
-@echo "视频比特率：%bitRate%bps"
-@echo "帧率：%fps%"
-@echo "音频比特率：%audioBitRate%bps"
+if "%width%" neq "" (
+	@echo "宽：%width%"
+)
+if "%height%" neq "" (
+	@echo "高：%height%"
+)
+if "%bitRate%" neq "" (
+	@echo "视频比特率：%bitRate%kbps"
+)
+if "%audioBitRate%" neq "" (
+	@echo "音频比特率：%audioBitRate%kbps"
+)
+if "%fps%" neq "" (
+	@echo "帧率：%fps%"
+)
+if "%audioSimpleRate%" neq "" (
+	@echo "音频采样率：%audioSimpleRate%"
+)
+
 if "%outPutFormat%" neq "" (
 	@echo "输出格式：%outPutFormat%"
 )
@@ -77,11 +93,36 @@ if "%outPutFormat%" neq "" (
 	)
 )
 
+set command=ffmpeg.exe -i %input% 
+if "%bitRate%" neq "" (
+	set command=%command% -b %bitRate%k
+)
+if "%audioBitRate%" neq "" (
+	set command=%command% -ab %audioBitRate%k
+)
+if "%fps%" neq "" (
+	set command=%command% -r %fps% 
+)
+if "%fps%" neq "" (
+	set command=%command% -r %fps% 
+)
+if "%audioSimpleRate%" neq "" (
+	set command=%command% -ar %audioSimpleRate% 
+)
 
+if "%width%" neq "" (
+	if "%height%" neq "" (
+		set command=%command% -s %width%x%height% 
+	)
+)
 
-call ffmpeg.exe -i %input% -ab %audioBitRate% -b %bitRate% -r %fps% -s "%width%x%height%" %newName% 
+set command=%command% %newName%
 
+@rem call ffmpeg.exe -i %input% -ab %audioBitRate%k -b %bitRate%k -r %fps% -s "%width%x%height%" %newName% 
 
+@rem @echo %command%
+
+call %command%
 
 :End 
 @rem echo "结束了 按任意键退出"
