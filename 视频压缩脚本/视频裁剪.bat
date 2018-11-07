@@ -5,13 +5,27 @@ setlocal EnableDelayedExpansion
 
 @rem  获取拖进来的文件名
 set input=%1
-
+set inputStartTime=%2
+set inputDuration=%3
 
 @echo ################################################################
-@echo                     音频格式转换脚本                   
+@echo                     音频裁剪脚本                   
 @echo                         作者   杨胜安                         
 @echo ################################################################
-@echo
+
+set startTime=0
+set duration=10
+for /f "tokens=1,2 delims==" %%i in (%currentPath%/config.properties) do (
+	if "%%i"=="startTime" set startTime=%%j
+	if "%%i"=="duration" set duration=%%j
+)
+if "%inputStartTime%" neq "" (
+	set startTime=%inputStartTime%
+)
+if "%inputDuration%" neq "" (
+	set duration=%inputDuration%
+)
+
 
 @rem 如果没有拖文件，只是双击，则结束
 if %input% == "" (
@@ -23,56 +37,43 @@ if %input% == "" (
 if %input:~0,1% neq ^" (
     set input="%input%"
 )
+
 echo %input%
 
 
 @rem  获取后缀
 set houzui="%~x1%"
 set houzui=%houzui:.=%
+
 echo "后缀 %houzui%"
 set newName=
 
-@echo "请输入你要输出的格式名称，如 mp3, wav, m4a, aac 等，然后回车"
-set /p outPutFormat=
-if /i "%outPutFormat%" neq %houzui% (
-	echo "您设置的输出格式与原文件格式一致，不需要转换，请按任意键退出"
-	pause>nul
-	goto :End
-)
-if /i "%outPutFormat%" neq "mp3" (
-	if /i "%outPutFormat%" neq "wav" (
 
-		if /i "%outPutFormat%" neq "m4a" (
-			if /i "%outPutFormat%" neq "aac" (
-				echo "您输入的格式不支持，按任意键退出" 
-				pause>nul
-				goto End
-			)
-		)
-	)
-)
-@rem 设置压缩后的名称， 规则是原名 +  .mp3(转换后的格式)
+
 set pathFilename=%~dpn1%
 
-set newName="%pathFilename%.%outPutFormat%"
+set newName="%pathFilename%_cut.%houzui%"
 set isSetNewName=false
 if exist %newName% (
 	@rem echo "%newName% 已存在"
 	for /l %%i in (1,1,10) do (
-		set tempName="!pathFilename!(%%i).!outPutFormat!"
+		set tempName="!pathFilename!(%%i)_cut.!houzui!"
 		if not exist !tempName! (
 			if "!isSetNewName!" neq "true" (
 				@rem echo !tempName! 不存在
-				set newName="!pathFilename!(%%i).!outPutFormat!"
+				set newName="!pathFilename!(%%i)_cut.!houzui!"
 				set isSetNewName=true
 			)
 		)
 		
 	)
 )
-@rem echo ffmpeg -i %input%  %newName%
 
-call ffmpeg -i %input%  %newName% 
+echo  ffmpeg -ss %startTime% -t %duration% -accurate_seek -i %input% -codec copy -avoid_negative_ts 1 %newName%
+
+
+
+call ffmpeg -ss  %startTime% -t %duration% -accurate_seek -i %input% -codec copy -avoid_negative_ts 1 %newName%
 
 :End 
 @rem echo "结束了 按任意键退出"

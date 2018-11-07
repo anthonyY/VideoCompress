@@ -18,6 +18,12 @@ if %input% == "" (
 	pause
 	goto End 
 )
+
+@rem 输入的文件有的有引号，有的没有引号，所以判断一下，没有就加上
+if %input:~0,1% neq ^" (
+    set input="%input%"
+)
+
 echo %input%
 
 @rem  获取后缀
