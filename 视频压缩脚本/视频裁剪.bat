@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion 
 
-@rem set currentPath=%~dp0%
+set currentPath=%~dp0%
 
 @rem  获取拖进来的文件名
 set input=%1
@@ -16,16 +16,17 @@ set inputDuration=%3
 set startTime=0
 set duration=10
 for /f "tokens=1,2 delims==" %%i in (%currentPath%/config.properties) do (
-	if "%%i"=="startTime" set startTime=%%j
-	if "%%i"=="duration" set duration=%%j
+	if "%%i"=="startTime" set inputStartTime=%%j
+	if "%%i"=="duration" set inputDuration=%%j
 )
+
+
 if "%inputStartTime%" neq "" (
 	set startTime=%inputStartTime%
 )
 if "%inputDuration%" neq "" (
 	set duration=%inputDuration%
 )
-
 
 @rem 如果没有拖文件，只是双击，则结束
 if %input% == "" (

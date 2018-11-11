@@ -35,42 +35,26 @@ set newName=
 
 @echo "请输入你要输出的视频格式名称，如 mp4, avi, flv, rmvb 等，然后回车"
 set /p outPutFormat=
-if /i "%outPutFormat%" equ %houzui% (
-	echo "您设置的输出格式与原文件格式一致，不需要转换，请按任意键退出"
-	pause>nul
-	goto :End
+
+
+set formats=mp4 avi flv rmvb rm mov mkv wmv mpeg 3gp ts mts vob swf
+set isFormatCorrect=false
+
+for  %%i in (%formats%) do (
+
+   if "!isFormatCorrect!" neq "true" (
+      if /i "!outPutFormat!" equ "%%i" (
+         set isFormatCorrect=true
+      ) 
+   )
 )
 
-
-if /i  "%outPutFormat%" neq "mp4" (
-if /i "%outPutFormat%" neq "avi" (
-if /i "%outPutFormat%" neq "flv" (
-if /i "%outPutFormat%" neq "rmvb" (
-if /i "%outPutFormat%" neq "rm" (
-if /i "%outPutFormat%" neq "mov" (
-if /i "%outPutFormat%" neq "mkv" (
-if /i "%outPutFormat%" neq "wmv" (
-if /i "%outPutFormat%" neq "mpeg" (
-if /i "%outPutFormat%" neq "3gp" (
-if /i "%outPutFormat%" neq "ts" (
-if /i "%outPutFormat%" neq "mts" (
-if /i "%outPutFormat%" neq "vob" (
+if "%isFormatCorrect%" neq "true" (
 	echo "您输入的格式不支持，按任意键退出" 
 	pause>nul
-	goto End
+ 	goto End
 )
-)
-)
-)
-)
-)
-)
-)
-)
-)
-)
-)
-)
+
 
 @rem 设置压缩后的名称， 规则是原名 +  .mp4(转换后的格式)
 set pathFilename=%~dpn1%
@@ -93,8 +77,7 @@ if exist %newName% (
 )
 
 echo  ffmpeg -i  %input% %newName%
-@rem echo ffmpeg -i %input%  %newName%
-
+ 
 
 call ffmpeg -i %input%  %newName% 
 
