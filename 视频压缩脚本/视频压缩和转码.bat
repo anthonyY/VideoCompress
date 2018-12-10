@@ -39,7 +39,7 @@ if %input% == "" (
 	goto End 
 )
 @rem 输入的文件有的有引号，有的没有引号，所以判断一下，没有就加上
-if %input:~0,1% neq ^" (
+if ^%input:~0,1% neq ^" (
     set input="%input%"
 )
 
@@ -102,18 +102,20 @@ if "%outPutFormat%" neq "" (
 set isSetNewName=false
 if exist %newName% (
     for /l %%i in (1,1,10) do (
-        set tempName="!pathFilename!_压缩后(%%i).!outPutFormat!"
+        set tempName="!pathFilename!_压缩后_%%i.!outPutFormat!"
         if not exist !tempName! (
             if "!isSetNewName!" neq "true" (
                  @rem echo !tempName! 不存在
-                 set newName="!pathFilename!_压缩后(%%i).!outPutFormat!"
+                 set newName="!pathFilename!_压缩后_%%i.!outPutFormat!"
                  set isSetNewName=true
             )
         )		
     )
 )
 
-set command=ffmpeg.exe -i %input% 
+%currentPath:~0,2% 
+cd %currentPath%
+set command=..\ffmpeg-win64\bin\ffmpeg -i %input% 
 
 if "%bitRate%" neq "" (
 	set command=%command% -b %bitRate%k
@@ -134,9 +136,9 @@ if "%width%" neq "" (
 )
 set command=%command% %newName%
 
-@rem echo %command%
-@rem pause
-@rem call ffmpeg.exe -i %input% -ab %audioBitRate%k -b %bitRate%k -r %fps% -s "%width%x%height%" %newName% 
+echo %command%
+
+@rem call ..\ffmpeg-win64\bin\ffmpeg -i %input% -ab %audioBitRate%k -b %bitRate%k -r %fps% -s "%width%x%height%" %newName% 
 
 
 call %command%

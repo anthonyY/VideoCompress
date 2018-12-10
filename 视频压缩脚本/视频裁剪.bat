@@ -3,6 +3,7 @@ setlocal EnableDelayedExpansion
 
 set currentPath=%~dp0%
 
+
 @rem  获取拖进来的文件名
 set input=%1
 set inputStartTime=%2
@@ -34,35 +35,36 @@ if %input% == "" (
 	pause
 	goto End 
 )
+
+
 @rem 输入的文件有的有引号，有的没有引号，所以判断一下，没有就加上
-if %input:~0,1% neq ^" (
+if ^%input:~0,1% neq ^" (
     set input="%input%"
 )
 
 echo %input%
-
-
 @rem  获取后缀
 set houzui="%~x1%"
 set houzui=%houzui:.=%
 
 echo "后缀 %houzui%"
+
+
 set newName=
-
-
 
 set pathFilename=%~dpn1%
 
 set newName="%pathFilename%_cut.%houzui%"
+
 set isSetNewName=false
 if exist %newName% (
 	@rem echo "%newName% 已存在"
 	for /l %%i in (1,1,10) do (
-		set tempName="!pathFilename!(%%i)_cut.!houzui!"
+		set tempName="!pathFilename!_cut_%%i.!houzui!"
 		if not exist !tempName! (
 			if "!isSetNewName!" neq "true" (
 				@rem echo !tempName! 不存在
-				set newName="!pathFilename!(%%i)_cut.!houzui!"
+				set newName="!pathFilename!_cut_%%i.!houzui!"
 				set isSetNewName=true
 			)
 		)
@@ -70,11 +72,14 @@ if exist %newName% (
 	)
 )
 
-echo  ffmpeg -ss %startTime% -t %duration% -accurate_seek -i %input% -codec copy -avoid_negative_ts 1 %newName%
+%currentPath:~0,2% 
+cd %currentPath%
+
+echo ..\ffmpeg-win64\bin\ffmpeg -ss %startTime% -t %duration% -accurate_seek -i %input% -codec copy -avoid_negative_ts 1 %newName%
 
 
-
-call ffmpeg -ss  %startTime% -t %duration% -accurate_seek -i %input% -codec copy -avoid_negative_ts 1 %newName%
+call  ..\ffmpeg-win64\bin\ffmpeg -ss  %startTime% -t %duration% -accurate_seek -i %input% -codec copy -avoid_negative_ts 1 %newName%
 
 :End 
 @rem echo "结束了 按任意键退出"
+

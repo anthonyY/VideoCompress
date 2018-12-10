@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableDelayedExpansion 
 
-@rem set currentPath=%~dp0%
+set currentPath=%~dp0%
 
 @rem  获取拖进来的文件名
 set input=%1
@@ -20,7 +20,7 @@ if %input% == "" (
 	goto End 
 )
 @rem 输入的文件有的有引号，有的没有引号，所以判断一下，没有就加上
-if %input:~0,1% neq ^" (
+if ^%input:~0,1% neq ^" (
     set input="%input%"
 )
 echo %input%
@@ -34,7 +34,8 @@ set newName=
 
 @echo "请输入你要输出的格式名称，如 mp3, wav, m4a, aac 等，然后回车"
 set /p outPutFormat=
-if /i "%outPutFormat%" neq %houzui% (
+
+if /i "%outPutFormat%" equ %houzui% (
 	echo "您设置的输出格式与原文件格式一致，不需要转换，请按任意键退出"
 	pause>nul
 	goto :End
@@ -59,20 +60,23 @@ set isSetNewName=false
 if exist %newName% (
 	@rem echo "%newName% 已存在"
 	for /l %%i in (1,1,10) do (
-		set tempName="!pathFilename!(%%i).!outPutFormat!"
+		set tempName="!pathFilename!_%%i.!outPutFormat!"
 		if not exist !tempName! (
 			if "!isSetNewName!" neq "true" (
 				@rem echo !tempName! 不存在
-				set newName="!pathFilename!(%%i).!outPutFormat!"
+				set newName="!pathFilename!_%%i.!outPutFormat!"
 				set isSetNewName=true
 			)
 		)
 		
 	)
 )
-@rem echo ffmpeg -i %input%  %newName%
 
-call ffmpeg -i %input%  %newName% 
+%currentPath:~0,2% 
+cd %currentPath%
+echo ..\ffmpeg-win64\bin\ffmpeg -i %input%  %newName%
+
+call ..\ffmpeg-win64\bin\ffmpeg -i %input%  %newName% 
 
 :End 
 @rem echo "结束了 按任意键退出"
